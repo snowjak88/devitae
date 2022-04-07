@@ -1,7 +1,7 @@
 devitae:
   auth:
     jwt:
-      # Users can remain authenticated for this long (in minutes) before their sessions expire.
+      # JWT tokens will expire after this interval.
       timeout: 1
       timeoutUnit: HOURS
       # Keystore for JWT signing and verification.
@@ -51,5 +51,5 @@ spring:
 logging:
   level:
     org.snowjak.devitae: debug
-    org.springframework.security: trace
-    org.springframework.web: trace
+    org.springframework.security: debug
+    org.springframework.web: debug

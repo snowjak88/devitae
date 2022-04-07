@@ -13,10 +13,7 @@ import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.crypto.password.PasswordEncoder;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 import org.springframework.web.server.ResponseStatusException;
 
 import java.util.Collection;
@@ -45,20 +42,20 @@ public class SecurityEndpoints {
         return new AuthDetails(auth);
     }
 
-    @PostMapping( path = "/login", consumes = { MediaType.APPLICATION_FORM_URLENCODED_VALUE }, produces = { MediaType.APPLICATION_JSON_VALUE } )
-    public JwtToken login(@RequestParam(name = "username") String username, @RequestParam(name = "password") String password) {
+    @PostMapping( path = "/login", consumes = { MediaType.APPLICATION_JSON_VALUE }, produces = { MediaType.APPLICATION_JSON_VALUE } )
+    public JwtToken login(@RequestBody UsernamePassword usernamePassword) {
 
-        LOG.info("Received login request for user '{}'", username);
+        LOG.info("Received login request for user '{}'", usernamePassword.username);
         final User user;
         try {
-            user = userService.loadUserByUsername(username);
+            user = userService.loadUserByUsername(usernamePassword.username);
         } catch(UsernameNotFoundException e) {
-            LOG.debug("User '{}' not found", username);
+            LOG.debug("User '{}' not found", usernamePassword.username);
             throw new ResponseStatusException(org.springframework.http.HttpStatus.UNAUTHORIZED, "Unknown username.");
         }
 
-        if(!passwordEncoder.matches(password, user.getPassword())) {
-            LOG.debug("Password for user '{}' does not match", username);
+        if(!passwordEncoder.matches(usernamePassword.password, user.getPassword())) {
+            LOG.debug("Password for user '{}' does not match", usernamePassword.username);
             throw new ResponseStatusException(org.springframework.http.HttpStatus.UNAUTHORIZED, "Invalid password.");
         }
 
@@ -67,10 +64,15 @@ public class SecurityEndpoints {
         final String claimedAuthorities = user.getScopes().stream().map(GrantedAuthority::getAuthority).collect(Collectors.joining(" "));
         claims.put("scope", claimedAuthorities);
 
-        LOG.debug("Issuing JWT for user '{}' with authorities '{}'", username, claimedAuthorities);
+        LOG.debug("Issuing JWT for user '{}' with authorities '{}'", usernamePassword.username, claimedAuthorities);
 
         return new JwtToken(jwtHelper.createJwtForClaims(user.getUsername(), claims));
 
+    }
+
+    public static class UsernamePassword {
+        public String username;
+        public String password;
     }
 
     public static class JwtToken {
