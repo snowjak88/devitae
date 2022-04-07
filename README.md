@@ -36,6 +36,9 @@ If the credentials are valid, the server will respond with a `200` status code a
 
 ```json
 {
+  "authenticated",
+  "username": {username},
+  "scopes": [{scopes/permissions}]
   "jwt": {JWT token}
 }
 ```
