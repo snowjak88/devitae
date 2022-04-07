@@ -1,0 +1,55 @@
+devitae:
+  auth:
+    jwt:
+      # Users can remain authenticated for this long (in minutes) before their sessions expire.
+      timeout: 1
+      timeoutUnit: HOURS
+      # Keystore for JWT signing and verification.
+      keystore:
+        path: /devitae.jks
+        password: devitae
+        alias: devitae
+        privateKeyPassphrase: devitae
+
+spring:
+  application:
+    name: devitae
+  datasource:
+    embedded-database-connection: none
+  jpa:
+    generate-ddl: false
+    open-in-view: false
+  mvc:
+    pathmatch:
+      matching-strategy: ant_path_matcher
+  profiles:
+    default: prod
+
+logging:
+  level:
+    org.snowjak.devitae: info
+    org.springframework.boot: info
+
+---
+
+spring:
+  config:
+    activate:
+      on-profile: local
+  datasource:
+    embedded-database-connection:
+  jpa:
+    generate-ddl: true
+    show-sql: true
+    defer-datasource-initialization: true
+  sql:
+    init:
+      platform: h2
+
+
+# Add your own logging levels for your packages.
+logging:
+  level:
+    org.snowjak.devitae: debug
+    org.springframework.security: trace
+    org.springframework.web: trace
