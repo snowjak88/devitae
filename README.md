@@ -27,10 +27,16 @@ that requires authentication.
 
 ### Logging In
 
-To log-in, the user must make a `POST` request to `/login`, with the following form-data:
+To log-in, the user must make a `POST` request to `/login`, with the following JSON payload:
 
-- `username`
-- `password`
+```json
+{
+  "username": {your username}
+  },
+  "password": {your password}
+}
+}
+```
 
 If the credentials are valid, the server will respond with a `200` status code and a JSON object of the form:
 
