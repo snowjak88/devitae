@@ -2,6 +2,7 @@ package org.snowjak.devitae.endpoints;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.snowjak.devitae.data.entities.Scope;
 import org.snowjak.devitae.data.entities.User;
 import org.snowjak.devitae.security.JwtHelper;
 import org.snowjak.devitae.services.UserService;
@@ -36,14 +37,8 @@ public class SecurityEndpoints {
     @Autowired
     private PasswordEncoder passwordEncoder;
 
-    @GetMapping( path = "/auth", produces = { MediaType.APPLICATION_JSON_VALUE } )
-    public AuthDetails getAuthenticated() {
-        final Authentication auth = SecurityContextHolder.getContext().getAuthentication();
-        return new AuthDetails(auth);
-    }
-
     @PostMapping( path = "/login", consumes = { MediaType.APPLICATION_JSON_VALUE }, produces = { MediaType.APPLICATION_JSON_VALUE } )
-    public JwtToken login(@RequestBody UsernamePassword usernamePassword) {
+    public LoginResponse login(@RequestBody UsernamePassword usernamePassword) {
 
         LOG.info("Received login request for user '{}'", usernamePassword.username);
         final User user;
@@ -66,7 +61,7 @@ public class SecurityEndpoints {
 
         LOG.debug("Issuing JWT for user '{}' with authorities '{}'", usernamePassword.username, claimedAuthorities);
 
-        return new JwtToken(jwtHelper.createJwtForClaims(user.getUsername(), claims));
+        return new LoginResponse(jwtHelper.createJwtForClaims(user.getUsername(), claims), user);
 
     }
 
@@ -75,38 +70,21 @@ public class SecurityEndpoints {
         public String password;
     }
 
-    public static class JwtToken {
-
-        public final String jwt;
-
-        JwtToken(String jwt) {
-            this.jwt = jwt;
-        }
-    }
-
-    public static class AuthDetails {
-
+    public static class LoginResponse {
         public final boolean authenticated;
+        public final String jwt;
         public final String username;
         public final Collection<String> scopes;
 
-        public AuthDetails(Authentication auth) {
-            if(auth == null || auth instanceof AnonymousAuthenticationToken) {
-                this.authenticated = false;
-                this.username = null;
-                this.scopes = Collections.emptyList();
-            }
-            else {
-                this.authenticated = auth.isAuthenticated();
-                this.username = auth.getName();
-                this.scopes = auth.getAuthorities().stream().map(GrantedAuthority::getAuthority).collect(Collectors.toList());
-            }
+        public LoginResponse(String jwt, User user) {
+            this(jwt, user.getUsername(), user.getScopes().stream().map(Scope::getName).collect(Collectors.toList()), true);
         }
 
-        public AuthDetails(boolean authenticated, String username, Collection<String> scopes) {
-            this.authenticated = authenticated;
+        public LoginResponse(String jwt, String username, Collection<String> scopes, boolean authenticated) {
+            this.jwt = jwt;
             this.username = username;
-            this.scopes = Collections.unmodifiableCollection(scopes);
+            this.scopes = scopes;
+            this.authenticated = authenticated;
         }
     }
 }
