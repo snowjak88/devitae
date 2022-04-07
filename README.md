@@ -1,28 +1,10 @@
-## v0.0.1
+# DeVitae
 
-Basic authentication is working. This can be tested by starting the application (using the **local** profile), and
-making some `curl` requests:
+This project arose out of a pun, "Developer" + "(curriculum) Vitae".
 
-#### Get authentication details without using any authentication token
-```bash
-> curl http://localhost:8080/auth
-
-{"authenticated":false,"username":null,"scopes":[]}
-```
-
-#### Log in to receive an authentication token
-```bash
-> curl -d "username=user" -d "password=password" http://localhost:8080/login
-
-{"jwt": [JWT-token] }
-```
-
-#### Get authentication details, this time using our token
-```bash
-> curl -H "Authorization: Bearer [JWT-token]" http://localhost:8080/auth
-
-{"authenticated":true,"username":"user","scopes":["SCOPE_browse","SCOPE_write","SCOPE_delete"]}
-```
+At time of writing, I still haven't worked out what this is for. I have a vague idea of a
+place to show off sandboxed code-samples. At present, this is for learning how to integrate
+Spring Security with React.JS, as well as newer React features like Contexts and Hooks.
 
 ### Security
 
