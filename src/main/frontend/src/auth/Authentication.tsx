@@ -1,6 +1,6 @@
 import { createContext, useContext, useState, ReactNode } from 'react';
 
-import axios from "axios";
+import axios, { AxiosError } from "axios";
 
 /*
  * Provides:
@@ -28,6 +28,16 @@ import axios from "axios";
  *         </AuthenticationContextProvider>
  *         );
  * }
+ *
+ * Notes on Authentication.login(...):
+ *  - This function yields a Promise representing the outcome of the login-process.AuthenticationContext
+ *    Obviously you can hook onto that using Promise.then(...) to, e.g., close a login-dialog.
+ *    But you also can, and should, listen for login-failures using Promise.catch().
+ *    Most notably, to access the returned HTTP-code, use code of the form:
+ *      ...
+ *      auth.login( myUsername, myPassword )
+ *          .catch( (error) => console.log( `HTTP code = ${error.response.data.status}` ) );
+ *      ...
  */
 
 export type Authentication = {
@@ -35,7 +45,7 @@ export type Authentication = {
     username?: string;
     scopes: string[];
     jwt?: string;
-    login: (username: string, password: string) => Promise<void>;
+    login: (username: string, password: string, onError?:(code: number) => void) => Promise<void>;
     logout: () => void;
 };
 
@@ -44,7 +54,7 @@ export const AuthenticationContext = createContext<Authentication>({
     username: undefined,
     scopes: [],
     jwt: undefined,
-    login: (username: string, password: string) => Promise.resolve(),
+    login: (username: string, password: string, onError?:(code: number) => void) => Promise.resolve(),
     logout: () => {}
 });
 
@@ -58,12 +68,11 @@ export const AuthenticationContextProvider = (props: AuthenticationProviderProps
         username: undefined,
         scopes: [],
         jwt: undefined,
-        login: (username: string, password: string) => {
+        login: (username: string, password: string, onError?:(code: number) => void) => {
             return axios
                 .post("/login", { username, password })
                 .then(response => {
-                    console.log(`Login response: ${JSON.stringify(response)}`);
-                    console.log(`Setting auth to ${JSON.stringify({ ...auth, ...response.data })}`);
+                    console.log(`Login successful: '${JSON.stringify(response)}'`);
                     setAuth({ ...auth, ...response.data });
                 });
         },

@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import { AxiosError } from "axios";
 
 import {
         Button,
@@ -40,12 +41,25 @@ export const LoginButton = (props:LoginButtonProps) => {
     };
 
     const onLoginSubmit = (auth: Authentication) => {
-        auth.login(loginState.form?.username as string, loginState.form?.password as string)
-            .then(() => {
-                hideLoginPopup();
-            })
-            .catch((error) => {
-                setLoginState({ ...loginState, loginPopupError: error.message });
+        auth.login( loginState.form?.username as string, loginState.form?.password as string )
+            .then( hideLoginPopup )
+            .catch( (error) => {
+                    const status = error?.response?.data?.status;
+                    let errorMessage: string;
+                    switch(status) {
+                        case 401:
+                            errorMessage = 'Invalid username or password.';
+                            break;
+                        case 403:
+                            errorMessage = 'Given account is locked.';
+                            break;
+                        case 408:
+                            errorMessage = 'Login request timed out. Application might be down.';
+                            break;
+                        default:
+                            errorMessage = `An unexpected error (${status || "?"}) occurred. Please try again later.`;
+                    }
+                    setLoginState({ ...loginState, loginPopupError: errorMessage });
             });
     };
 

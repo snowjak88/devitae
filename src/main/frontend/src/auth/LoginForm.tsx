@@ -61,7 +61,6 @@ export const LoginForm = (props: LoginFormProps) => {
             <TextField autoFocus
                        id="name" name="username" label="Username"
                        error={(props.errorMessage !== undefined)}
-                       helperText={props.errorMessage}
                        value={formState.username} onChange={onLoginFormUpdate} />
             <FormControl error={(props.errorMessage !== undefined)}>
                 <InputLabel htmlFor="password">Password</InputLabel>
