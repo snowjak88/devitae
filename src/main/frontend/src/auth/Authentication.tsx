@@ -35,7 +35,8 @@ export type Authentication = {
     username?: string;
     scopes: string[];
     jwt?: string;
-    login: (username: string, password: string) => void;
+    login: (username: string, password: string) => Promise<void>;
+    logout: () => void;
 };
 
 export const AuthenticationContext = createContext<Authentication>({
@@ -43,7 +44,8 @@ export const AuthenticationContext = createContext<Authentication>({
     username: undefined,
     scopes: [],
     jwt: undefined,
-    login: (username: string, password: string) => {}
+    login: (username: string, password: string) => Promise.resolve(),
+    logout: () => {}
 });
 
 type AuthenticationProviderProps = {
@@ -57,13 +59,16 @@ export const AuthenticationContextProvider = (props: AuthenticationProviderProps
         scopes: [],
         jwt: undefined,
         login: (username: string, password: string) => {
-            axios
+            return axios
                 .post("/login", { username, password })
                 .then(response => {
                     console.log(`Login response: ${JSON.stringify(response)}`);
                     console.log(`Setting auth to ${JSON.stringify({ ...auth, ...response.data })}`);
                     setAuth({ ...auth, ...response.data });
                 });
+        },
+        logout: () => {
+            setAuth({ ...auth, authenticated: false, username: undefined, scopes: [], jwt: undefined });
         }
     });
 

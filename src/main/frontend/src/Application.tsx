@@ -4,6 +4,7 @@ import { BrowserRouter as Router } from "react-router-dom";
 import { Button } from "@material-ui/core";
 
 import { Authentication, AuthenticationContext, AuthenticationContextProvider } from "./auth/Authentication";
+import { LoginButton } from "./auth/Login";
 
 type ApplicationProp = {}
 
@@ -16,9 +17,7 @@ const Application = (props: ApplicationProp) => {
                 <AuthenticationContext.Consumer>
                     {(auth:Authentication) => (<p>You are {auth.authenticated ? `currently authenticated as ${auth.username}` : "not authenticated" }.</p>)}
                 </AuthenticationContext.Consumer>
-                <AuthenticationContext.Consumer>
-                    {(auth:Authentication) => (<Button onClick={() => auth.login("user", "password")}>Log-in</Button>)}
-                </AuthenticationContext.Consumer>
+                <LoginButton />
             </AuthenticationContextProvider>
         </Router>
     );
