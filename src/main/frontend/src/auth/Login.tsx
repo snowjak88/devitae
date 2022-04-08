@@ -1,27 +1,24 @@
-import React, { useState, ChangeEvent } from 'react';
+import React, { useState } from 'react';
 
 import {
         Button,
-        Dialog, DialogActions, DialogContent, DialogTitle,
-        TextField
+        Dialog, DialogActions, DialogContent, DialogTitle
     } from '@material-ui/core';
 import LockIcon from '@material-ui/icons/Lock';
 import LockOpenIcon from '@material-ui/icons/LockOpen';
 
 import { Authentication, AuthenticationContext } from './Authentication';
+import { LoginForm, LoginFormContents } from './LoginForm';
 
 /*
  * Exposes a Log-In/-Out button.
- * Activating the button when the user is *not* authenticated will open a dialog for the user to enter his credentials.
- * Activating the button when the user is authenticated will call Authentication.logout() (i.e., will clear the
- * user's authentication-info).
+ * Activating the button when the user is *not* authenticated will open a dialog containing a LoginForm.
  */
 
 type LoginState = {
     loginPopupVisible: boolean;
     loginPopupError?: string;
-    username?: string;
-    password?: string;
+    form?: LoginFormContents;
 };
 
 type LoginButtonProps = {};
@@ -31,23 +28,19 @@ export const LoginButton = (props:LoginButtonProps) => {
     const [loginState, setLoginState] = useState({ loginPopupVisible: false } as LoginState);
 
     const showLoginPopup = () => {
-        setLoginState({ loginPopupVisible: true, loginPopupError: undefined, username: undefined, password: undefined });
+        setLoginState({ loginPopupVisible: true, loginPopupError: undefined, form: undefined });
     };
 
     const hideLoginPopup = () => {
-        setLoginState({ loginPopupVisible: false, loginPopupError: undefined, username: undefined, password: undefined });
+        setLoginState({ loginPopupVisible: false, loginPopupError: undefined, form: undefined });
     };
 
-    const onLoginFormUpdate = (event: ChangeEvent<HTMLInputElement>) => {
-        const target = event.target;
-        const value = target.type === 'checkbox' ? target.checked : target.value;
-        const name = target.name;
-
-        setLoginState({ ...loginState, [name]: value });
+    const onLoginFormUpdate = (form: LoginFormContents) => {
+        setLoginState({ ...loginState, form: form });
     };
 
     const onLoginSubmit = (auth: Authentication) => {
-        auth.login(loginState.username as string, loginState.password as string)
+        auth.login(loginState.form?.username as string, loginState.form?.password as string)
             .then(() => {
                 hideLoginPopup();
             })
@@ -70,17 +63,7 @@ export const LoginButton = (props:LoginButtonProps) => {
                             aria-labelledby="login-popup-title">
                         <DialogTitle id="login-popup-title">Log In</DialogTitle>
                         <DialogContent>
-                            <form noValidate autoComplete="off">
-                                <TextField autoFocus
-                                           id="name" name="username" label="Username"
-                                           error={(loginState.loginPopupError !== undefined)}
-                                           value={loginState.username} onChange={onLoginFormUpdate}
-                                           fullWidth />
-                                <TextField id="password" name="password" label="Password" type="password"
-                                           error={(loginState.loginPopupError !== undefined)}
-                                           value={loginState.password} onChange={onLoginFormUpdate}
-                                           fullWidth />
-                            </form>
+                            <LoginForm onUpdate={onLoginFormUpdate} errorMessage={loginState.loginPopupError} />
                         </DialogContent>
                         <DialogActions>
                             <Button onClick={() => onLoginSubmit(auth)} color="primary">Submit</Button>
