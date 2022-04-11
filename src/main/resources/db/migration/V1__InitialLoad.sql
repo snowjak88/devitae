@@ -34,7 +34,7 @@ insert into `Scopes` ( version, name ) values ( 1, 'delete-all' );
 --   * iterations: 50,000
 --   * hash-width: 256
 --   * Cipher: PBKDF2WithHmacSHA1
-insert into `Users` ( version, username, password, created ) values ( 1, 'admin', 'jQd6X8yaNdQjjNJwN/bqU4roqgVkXEWBY++iP5D6aig=', getdate() );
+insert into `Users` ( version, username, password, created ) values ( 1, 'admin', 'jQd6X8yaNdQjjNJwN/bqU4roqgVkXEWBY++iP5D6aig=', now() );
 insert into `User_Scopes` ( userID, scopeID )
 select u.id, s.id
     from `Users` u
