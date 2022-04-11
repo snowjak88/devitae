@@ -89,6 +89,10 @@ dependencies {
     implementation("com.h2database:h2")
 
     //
+    // MySQL for Heroku
+    implementation("mysql:mysql-connector-java")
+
+    //
     // Flyway for Production deployment
     implementation("org.flywaydb:flyway-core")
 
