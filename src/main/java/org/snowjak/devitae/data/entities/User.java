@@ -26,7 +26,7 @@ public class User implements UserDetails {
     private String username;
 
     @Basic
-    @Column(name = "password", length = 255)
+    @Column(name = "password", length = 255, nullable = false)
     private String password;
 
     @ManyToMany(targetEntity = Scope.class, fetch = FetchType.EAGER)

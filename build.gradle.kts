@@ -81,10 +81,16 @@ dependencies {
     implementation("org.springframework.boot:spring-boot-starter-data-jpa")
 
     implementation("com.auth0:java-jwt:3.19.1")
+
     implementation("net.logstash.logback:logstash-logback-encoder:7.1")
 
+    //
+    // H2 for local development only
+    implementation("com.h2database:h2")
 
-    implementation("com.h2database:h2:2.1.210")
+    //
+    // Flyway for Production deployment
+    implementation("org.flywaydb:flyway-core")
 
     testImplementation("org.springframework.boot:spring-boot-starter-test")
 }

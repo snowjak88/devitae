@@ -1,5 +1,6 @@
 package org.snowjak.devitae.config;
 
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Profile;
@@ -16,7 +17,7 @@ import org.springframework.security.crypto.password.Pbkdf2PasswordEncoder;
 public class ProductionConfig {
 
     @Bean
-    public PasswordEncoder passwordEncoder() {
-        return new Pbkdf2PasswordEncoder();
+    public PasswordEncoder passwordEncoder(@Value("${PASSWORD_SALT}") String secretSalt) {
+        return new Pbkdf2PasswordEncoder(secretSalt, 50000, 256);
     }
 }

@@ -1,3 +1,8 @@
+#
+# Default password-salt.
+# You should probably provide this at run-time via an environment variable.
+PASSWORD_SALT: 'abc123'
+
 devitae:
   auth:
     jwt:
@@ -19,6 +24,8 @@ spring:
   jpa:
     generate-ddl: false
     open-in-view: false
+    hibernate:
+      ddl-auto: validate
   mvc:
     pathmatch:
       matching-strategy: ant_path_matcher
@@ -42,10 +49,11 @@ spring:
     generate-ddl: true
     show-sql: true
     defer-datasource-initialization: true
+  hibernate:
+    ddl-auto:
   sql:
     init:
       platform: h2
-
 
 # Add your own logging levels for your packages.
 logging:

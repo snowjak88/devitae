@@ -15,6 +15,7 @@ public class Scope implements GrantedAuthority {
     private int version;
 
     @Basic(optional = false)
+    @Column(name = "name", updatable = false, insertable = false, length = 255, unique = true)
     private String name;
 
     public int getId() {
