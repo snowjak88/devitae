@@ -21,6 +21,7 @@ spring:
     name: devitae
   datasource:
     embedded-database-connection: none
+    url: jdbc:${CLEARDB_DATABASE_URL}
   jpa:
     generate-ddl: false
     open-in-view: false
