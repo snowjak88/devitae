@@ -89,8 +89,8 @@ dependencies {
     implementation("com.h2database:h2")
 
     //
-    // MySQL for Heroku
-    implementation("mysql:mysql-connector-java")
+    // MariaDB for Heroku
+    implementation("org.mariadb.jdbc:mariadb-java-client:3.0.4")
 
     //
     // Flyway for Production deployment
