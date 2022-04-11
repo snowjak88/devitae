@@ -51,6 +51,7 @@ public class SecurityEndpoints {
             throw new ResponseStatusException(org.springframework.http.HttpStatus.UNAUTHORIZED, "Unknown username.");
         }
 
+        LOG.debug("Looking for match on password {} --> {}", kv("unencrypted", usernamePassword.password), kv("encrypted", passwordEncoder.encode(usernamePassword.password)));
         if(!passwordEncoder.matches(usernamePassword.password, user.getPassword())) {
             LOG.debug("Password for user does not match: ", kv("username", usernamePassword.username));
             throw new ResponseStatusException(org.springframework.http.HttpStatus.UNAUTHORIZED, "Invalid password.");
