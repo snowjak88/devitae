@@ -27,6 +27,9 @@ spring:
     open-in-view: false
     hibernate:
       ddl-auto: validate
+      naming:
+        physical-strategy: org.hibernate.boot.model.naming.PhysicalNamingStrategyStandardImpl
+        implicit-strategy: org.hibernate.boot.model.naming.ImplicitNamingStrategyJpaCompliantImpl
   mvc:
     pathmatch:
       matching-strategy: ant_path_matcher
