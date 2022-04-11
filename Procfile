@@ -1,1 +1,1 @@
-web: java -Dserver.port=$PORT -jar build/libs/devitae-0.0.1.jar
+web: java -Dserver.port=$PORT $JAVA_OPTS -jar build/libs/devitae-0.0.1.jar
