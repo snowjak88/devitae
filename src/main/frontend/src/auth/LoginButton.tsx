@@ -44,7 +44,7 @@ export const LoginButton = (props:LoginButtonProps) => {
         auth.login( loginState.form?.username as string, loginState.form?.password as string )
             .then( hideLoginPopup )
             .catch( (error) => {
-                    const status = error?.response?.data?.status;
+                    const status = error?.response?.status;
                     let errorMessage: string;
                     switch(status) {
                         case 401:

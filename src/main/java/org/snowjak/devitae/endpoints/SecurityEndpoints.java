@@ -1,5 +1,7 @@
 package org.snowjak.devitae.endpoints;
 
+import static net.logstash.logback.argument.StructuredArguments.*;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.snowjak.devitae.data.entities.Scope;
@@ -40,17 +42,17 @@ public class SecurityEndpoints {
     @PostMapping( path = "/login", consumes = { MediaType.APPLICATION_JSON_VALUE }, produces = { MediaType.APPLICATION_JSON_VALUE } )
     public LoginResponse login(@RequestBody UsernamePassword usernamePassword) {
 
-        LOG.info("Received login request for user '{}'", usernamePassword.username);
+        LOG.info("Received login request for user: {}", kv("username", usernamePassword.username));
         final User user;
         try {
             user = userService.loadUserByUsername(usernamePassword.username);
         } catch(UsernameNotFoundException e) {
-            LOG.debug("User '{}' not found", usernamePassword.username);
+            LOG.debug("User not found: {}", kv("username", usernamePassword.username));
             throw new ResponseStatusException(org.springframework.http.HttpStatus.UNAUTHORIZED, "Unknown username.");
         }
 
         if(!passwordEncoder.matches(usernamePassword.password, user.getPassword())) {
-            LOG.debug("Password for user '{}' does not match", usernamePassword.username);
+            LOG.debug("Password for user does not match: ", kv("username", usernamePassword.username));
             throw new ResponseStatusException(org.springframework.http.HttpStatus.UNAUTHORIZED, "Invalid password.");
         }
 
@@ -59,7 +61,7 @@ public class SecurityEndpoints {
         final String claimedAuthorities = user.getScopes().stream().map(GrantedAuthority::getAuthority).collect(Collectors.joining(" "));
         claims.put("scope", claimedAuthorities);
 
-        LOG.debug("Issuing JWT for user '{}' with authorities '{}'", usernamePassword.username, claimedAuthorities);
+        LOG.debug("Issuing JWT for user with authorities", kv("username", usernamePassword.username), kv("claimedAuthorities",  claimedAuthorities));
 
         return new LoginResponse(jwtHelper.createJwtForClaims(user.getUsername(), claims), user);
 

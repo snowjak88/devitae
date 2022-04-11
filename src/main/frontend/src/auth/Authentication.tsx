@@ -36,7 +36,7 @@ import axios, { AxiosError } from "axios";
  *    Most notably, to access the returned HTTP-code, use code of the form:
  *      ...
  *      auth.login( myUsername, myPassword )
- *          .catch( (error) => console.log( `HTTP code = ${error.response.data.status}` ) );
+ *          .catch( (error) => console.log( `HTTP code = ${error.response.status}` ) );
  *      ...
  */
 

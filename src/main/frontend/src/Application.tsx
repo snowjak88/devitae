@@ -4,7 +4,7 @@ import { BrowserRouter as Router } from "react-router-dom";
 import { Button } from "@material-ui/core";
 
 import { Authentication, AuthenticationContext, AuthenticationContextProvider } from "./auth/Authentication";
-import { LoginButton } from "./auth/Login";
+import { LoginButton } from "./auth/LoginButton";
 
 type ApplicationProp = {}
 
