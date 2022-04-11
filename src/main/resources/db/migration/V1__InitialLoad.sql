@@ -30,7 +30,7 @@ insert into [Scopes] ( [version], [name] ) values ( 1, 'delete-all' );
 -- Admin user.
 -- While the local environment uses unencrypted passwords, all other environments
 -- use passwords encrypted using PBKDF2:
---   * salt: ${PASSWORD_SALT}, should provide as an environment variable
+--   * salt: c.f. PASSWORD_SALT, should provide as an environment variable
 --   * iterations: 50,000
 --   * hash-width: 256
 --   * Cipher: PBKDF2WithHmacSHA1
