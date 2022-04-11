@@ -1,11 +1,11 @@
 create table `Scopes` (
-    id int identity(1,1) primary key,
+    id int auto_increment primary key,
     version int not null,
     name nvarchar(255) not null unique
 );
 
 create table `Users` (
-    id int identity(1,1) primary key,
+    id int auto_increment primary key,
     version int not null,
     username nvarchar(255) not null unique,
     password nvarchar(255) not null,
