@@ -18,6 +18,10 @@ public class Scope implements GrantedAuthority {
     @Column(name = "name", updatable = false, insertable = false, length = 255, unique = true)
     private String name;
 
+    @Basic(optional = false)
+    @Column(name = "isDefault", updatable = true, insertable = true)
+    private boolean isDefault = false;
+
     public int getId() {
         return id;
     }
@@ -40,6 +44,14 @@ public class Scope implements GrantedAuthority {
 
     public void setName(String name) {
         this.name = name;
+    }
+
+    public boolean isDefault() {
+        return isDefault;
+    }
+
+    public void setDefault(boolean aDefault) {
+        isDefault = aDefault;
     }
 
     @Override
