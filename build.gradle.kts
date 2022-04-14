@@ -7,6 +7,9 @@ plugins {
     id("org.springframework.boot")
     id("io.spring.dependency-management")
     id("com.github.node-gradle.node")
+
+    id("com.palantir.docker")
+    id("com.palantir.docker-compose")
 }
 
 // change me to your group name //
@@ -72,6 +75,32 @@ tasks {
     clean {
         dependsOn(cleanup)
     }
+
+    findByPath("dockerPrepare")?.dependsOn(bootJar)
+
+    docker {
+        dependsOn(bootJar.get())
+        name = "${project.group}/${project.name}:${project.version}"
+        files(bootJar.get().archiveFile.get())
+        buildArgs(mapOf("JAR_FILE" to bootJar.get().archiveFileName.get()))
+        pull(true)
+    }
+
+    val dockerComposeTemplateExpand = create<Copy>("docker-compose-template-expand") {
+        expand(project.properties)
+        from("${rootDir}/docker-compose.yml.template")
+        into("${buildDir}")
+        rename("docker-compose.yml.template", "docker-compose.yml.template.expanded")
+    }
+
+    clean.get().delete.add("${buildDir}/docker-compose.yml.template.expanded")
+
+    dockerCompose {
+        setTemplate( "${buildDir}/docker-compose.yml.template.expanded" )
+        setDockerComposeFile( "${buildDir}/docker-compose.yml" )
+    }
+
+    findByPath("dockerComposeUp")?.dependsOn("docker-compose-template-expand", "docker", "generateDockerCompose")
 }
 
 dependencies {
@@ -87,6 +116,10 @@ dependencies {
     //
     // H2 for local development only
     implementation("com.h2database:h2")
+
+    //
+    // MySQL for non-local deployment
+    implementation("mysql:mysql-connector-java:8.0.28")
 
     //
     // Flyway for Production deployment

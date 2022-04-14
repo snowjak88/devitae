@@ -1,43 +1,36 @@
-create table [Scopes] (
-    [id] int identity(1,1) primary key,
-    [version] int not null,
-    [name] nvarchar(255) not null unique
+create table `Scopes` (
+    `id` int auto_increment primary key,
+    `version` int not null,
+    `name` nvarchar(255) not null unique,
+    `isDefault` boolean not null default false
 );
 
-create table [Users] (
-    [id] int identity(1,1) primary key,
-    [version] int not null,
-    [username] nvarchar(255) not null unique,
-    [password] nvarchar(255) not null,
-    [created] datetime not null
+create table `Users` (
+    `id` int auto_increment primary key,
+    `version` int not null,
+    `username` nvarchar(255) not null unique,
+    `password` nvarchar(255) not null,
+    `created` datetime not null
 );
 
-create table [User_Scopes] (
-    [userID] int not null,
-    [scopeID] int not null,
-    foreign key ( [userID] ) references [Users] ( [id] ),
-    foreign key ( [ScopeID] ) references [Scopes] ( [id] )
+create table `User_Scopes` (
+    `userID` int not null,
+    `scopeID` int not null,
+    foreign key ( `userID` ) references `Users` ( `id` ),
+    foreign key ( `ScopeID` ) references `Scopes` ( `id` )
 );
 
-insert into [Scopes] ( [version], [name] ) values ( 1, 'browse' );
-insert into [Scopes] ( [version], [name] ) values ( 1, 'write' );
-insert into [Scopes] ( [version], [name] ) values ( 1, 'delete' );
-insert into [Scopes] ( [version], [name] ) values ( 1, 'browse-all' );
-insert into [Scopes] ( [version], [name] ) values ( 1, 'write-all' );
-insert into [Scopes] ( [version], [name] ) values ( 1, 'delete-all' );
+insert into `Scopes` ( `version`, `isDefault`, `name` )
+    values
+    ( 1, true, 'browse' ),
+    ( 1, true, 'write' ),
+    ( 1, true, 'delete' ),
+    ( 1, true, 'browse-all' ),
+    ( 1, false, 'write-all' ),
+    ( 1, false, 'delete-all' ),
+    ( 1, false, 'user_create' ),
+    ( 1, false, 'user_update' ),
+    ( 1, false, 'user_chmod' ),
+    ( 1, false, 'user_viewDetails' ),
+    ( 1, false, 'user_delete' );
 
---
--- Admin user.
--- While the local environment uses unencrypted passwords, all other environments
--- use passwords encrypted using PBKDF2:
---   * salt: ${PASSWORD_SALT}, should provide as an environment variable
---   * iterations: 50,000
---   * hash-width: 256
---   * Cipher: PBKDF2WithHmacSHA1
-insert into [Users] ( [version], [username], [password], [created] ) values ( 1, 'admin', 'jQd6X8yaNdQjjNJwN/bqU4roqgVkXEWBY++iP5D6aig=', getdate() );
-insert into [User_Scopes] ( [userID], [scopeID] )
-select u.[id], s.[id]
-    from [Users] u
-    cross join [Scopes] s
-    where u.[username] = 'admin'
-        and s.[name] in ( 'browse', 'write', 'delete', 'browse-all', 'write-all', 'delete-all' );

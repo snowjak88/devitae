@@ -17,7 +17,7 @@ import java.util.Collection;
 
 import static net.logstash.logback.argument.StructuredArguments.kv;
 
-@RestController("/user")
+@RestController
 public class UserManagementEndpoints {
 
     private static final Logger LOG = LoggerFactory.getLogger(UserManagementEndpoints.class);
@@ -29,7 +29,7 @@ public class UserManagementEndpoints {
     private PasswordEncoder passwordEncoder;
 
     @PreAuthorize("isAuthenticated() && ( hasAuthority('user_viewDetails') || authentication.details.id == #userId )")
-    @GetMapping(value = "/{userID}", produces = MediaType.APPLICATION_JSON_VALUE)
+    @GetMapping(value = "/user/{userID}", produces = MediaType.APPLICATION_JSON_VALUE)
     public User getUser(@RequestParam("userID") int userID, @AuthenticationPrincipal User user) {
 
         LOG.debug("Viewing user.", kv("viewerID", user.getId()), kv("viewedID", userID));
@@ -43,7 +43,7 @@ public class UserManagementEndpoints {
     }
 
     @PreAuthorize("isAuthenticated() && hasAuthority('user_create')")
-    @PutMapping(value = "/create", consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
+    @PutMapping(value = "/user/create", consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
     public User createUser(String username, String password, @AuthenticationPrincipal User creator) throws UserService.UsernameAlreadyExistsException {
 
         LOG.info("Creating a new user.", kv("creatorID", creator.getId()), kv("username", username));
@@ -53,7 +53,7 @@ public class UserManagementEndpoints {
     }
 
     @PreAuthorize("isAuthenticated() && hasAuthority('user_delete')")
-    @DeleteMapping(value = "/{userID}", produces = MediaType.APPLICATION_JSON_VALUE)
+    @DeleteMapping(value = "/user/{userID}", produces = MediaType.APPLICATION_JSON_VALUE)
     public HttpStatus deleteUser(@RequestParam("userID") int toDeleteID, @AuthenticationPrincipal User deleter) throws UserService.UserNotFoundException {
 
         if(toDeleteID == deleter.getId())
@@ -66,7 +66,7 @@ public class UserManagementEndpoints {
     }
 
     @PreAuthorize("isAuthenticated() && hasAuthority('user_update') || authentication.details.id == #toUpdateID")
-    @PostMapping(value="/{userID}", consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
+    @PostMapping(value="/user/{userID}", consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
     public User updateUser(@RequestParam("userID") int toUpdateID, @RequestBody User toUpdate, @AuthenticationPrincipal User updater) throws UserService.UserNotFoundException, UserService.UsernameAlreadyExistsException {
 
         LOG.info("Updating user.", kv("updaterID", updater.getId()), kv("toUpdateID", toUpdateID));
@@ -76,7 +76,7 @@ public class UserManagementEndpoints {
     }
 
     @PreAuthorize("isAuthenticated() && hasAuthority('user_update') || authentication.details.id == #toUpdateID")
-    @PostMapping(value="/{userID}/password", consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
+    @PostMapping(value="/user/{userID}/password", consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
     public HttpStatus changePassword(@RequestParam("userID") int toUpdateID, @RequestParam("password") String password, @AuthenticationPrincipal User updater) throws UserService.UserNotFoundException {
 
         LOG.info("Changing password.", kv("updaterID", updater.getId()), kv("toUpdateID", toUpdateID));
@@ -86,7 +86,7 @@ public class UserManagementEndpoints {
     }
 
     @PreAuthorize("isAuthenticated() && hasAuthority('user_chmod')")
-    @PostMapping(value="/{userID}/scopes", consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
+    @PostMapping(value="/user/{userID}/scopes", consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
     public User updateUserScopes(@RequestParam("userID") int toUpdateID, @RequestBody ScopeUpdates scopeUpdates, @AuthenticationPrincipal User updater) throws UserService.UserNotFoundException {
 
         LOG.info("Modifying user scopes.", kv("updaterID", updater.getId()), kv("toUpdateID", toUpdateID), kv("scopeAdds", scopeUpdates.add), kv("scopeRemoves", scopeUpdates.remove));

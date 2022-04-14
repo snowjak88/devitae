@@ -21,12 +21,18 @@ spring:
     name: devitae
   datasource:
     embedded-database-connection: none
-    url: jdbc:${CLEARDB_DATABASE_URL}
+    url: jdbc:${JAWSDB_MARIA_URL}
+    hikari:
+      initialization-fail-timeout: 30000
+    initialization-mode: never
   jpa:
     generate-ddl: false
     open-in-view: false
     hibernate:
       ddl-auto: validate
+      naming:
+        physical-strategy: org.hibernate.boot.model.naming.PhysicalNamingStrategyStandardImpl
+        implicit-strategy: org.hibernate.boot.model.naming.ImplicitNamingStrategyJpaCompliantImpl
   mvc:
     pathmatch:
       matching-strategy: ant_path_matcher
@@ -46,12 +52,9 @@ spring:
       on-profile: local
   datasource:
     embedded-database-connection:
+    url:
   jpa:
-    generate-ddl: true
     show-sql: true
-    defer-datasource-initialization: true
-  hibernate:
-    ddl-auto:
   sql:
     init:
       platform: h2
