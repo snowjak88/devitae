@@ -22,6 +22,9 @@ spring:
   datasource:
     embedded-database-connection: none
     url: jdbc:${JAWSDB_MARIA_URL}
+    hikari:
+      initialization-fail-timeout: 30000
+    initialization-mode: never
   jpa:
     generate-ddl: false
     open-in-view: false
@@ -49,12 +52,9 @@ spring:
       on-profile: local
   datasource:
     embedded-database-connection:
+    url:
   jpa:
-    generate-ddl: true
     show-sql: true
-    defer-datasource-initialization: true
-  hibernate:
-    ddl-auto:
   sql:
     init:
       platform: h2
