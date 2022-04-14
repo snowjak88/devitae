@@ -2,6 +2,7 @@ package org.snowjak.devitae.data.entities;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonProperty;
+import com.fasterxml.jackson.databind.annotation.JsonSerialize;
 import org.springframework.data.annotation.CreatedDate;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
@@ -37,6 +38,7 @@ public class User implements UserDetails {
     @ManyToMany(targetEntity = Scope.class, fetch = FetchType.EAGER)
     @JoinTable(name = "User_Scopes", joinColumns = @JoinColumn(name = "userID"), inverseJoinColumns = @JoinColumn(name = "scopeID"))
     @JsonProperty
+    @JsonSerialize(contentUsing=Scope.Serializer.class)
     private Collection<Scope> scopes = new ArrayList<>();
 
     @Basic(optional = false)

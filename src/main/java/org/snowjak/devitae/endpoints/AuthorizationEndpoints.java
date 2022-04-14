@@ -55,6 +55,7 @@ public class AuthorizationEndpoints {
         }
 
         final Map<String,String> claims = new HashMap<>();
+        claims.put("id", Integer.toString(user.getId()));
         claims.put("username", user.getUsername());
         final String claimedAuthorities = user.getScopes().stream().map(GrantedAuthority::getAuthority).collect(Collectors.joining(" "));
         claims.put("scope", claimedAuthorities);
@@ -72,17 +73,15 @@ public class AuthorizationEndpoints {
     public static class LoginResponse {
         public final boolean authenticated;
         public final String jwt;
-        public final String username;
-        public final Collection<String> scopes;
+        public final int id;
 
         public LoginResponse(String jwt, User user) {
-            this(jwt, user.getUsername(), user.getScopes().stream().map(Scope::getName).collect(Collectors.toList()), true);
+            this(jwt, user.getId(), true);
         }
 
-        public LoginResponse(String jwt, String username, Collection<String> scopes, boolean authenticated) {
+        public LoginResponse(String jwt, int id, boolean authenticated) {
             this.jwt = jwt;
-            this.username = username;
-            this.scopes = scopes;
+            this.id = id;
             this.authenticated = authenticated;
         }
     }
