@@ -1,7 +1,16 @@
 #
 # Default password-salt.
+#
 # You should probably provide this at run-time via an environment variable.
-PASSWORD_SALT: 'abc123'
+PASSWORD_SALT: abc123
+
+#
+# Default admin password.
+# Every time the application is started, it checks for the presence of the "admin" user.
+# If that user does not exist, then it is (re-)created, with this password.
+#
+# You should probably provide this at run-time via an environment variable.
+ADMIN_PASSWORD: admin
 
 devitae:
   auth:
