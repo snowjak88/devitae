@@ -31,18 +31,13 @@ There are some properties you should absolutely set using environment variables 
 - `spring.datasource.url` -- a URL to your database. Omit the `jdbc:` prefix.
 - `PASSWORD_SALT` -- used to configure password-hashing.
 - `ADMIN_PASSWORD` -- used to configure the default admin user (`admin`). This is only configured if the admin user is
-missing (and, even then, only when database migrations happen). You can safely update the admin password and, so long as
-the `admin` user continues to exist, this property will have no effect.
+missing. You can safely update the admin password and, so long as the `admin` user continues to exist, this property
+will have no effect.
 
-### Migrations
+### Startup-Checks
 
-We're using Flyway as our database migration management system.
-
-These migrations principally handle schema creation and changes. That being said, even with the first iteration
-there are some migrations that need to be done in Java.
-
-- `org.snowjak.devitae.data.migrations.CheckForDefaultAdminUser`: every time Flyway performs a migration, 
-this will check for the existence of the default admin-user (username = 'admin'). If it doesn't exist,
+- `org.snowjak.devitae.listeners.CheckForAdminUserOnStartup`: every time our application starts up, 
+this `ApplicationListener` will check for the existence of the default admin-user (username = 'admin'). If it doesn't exist,
 it will (re)create it, with the configured default password (`${ADMIN_PASSWORD}`) and all configured scopes.
 
 ### Security
