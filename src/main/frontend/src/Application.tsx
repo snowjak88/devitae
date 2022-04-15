@@ -2,7 +2,7 @@ import { useState } from 'react';
 import { BrowserRouter as Router } from "react-router-dom";
 
 import { Authentication, AuthenticationContext, AuthenticationContextProvider } from "./auth/Authentication";
-import { LoginButton } from "./auth/LoginButton";
+import { AppNavBar } from "./nav/AppNavBar";
 import { UserContextProvider } from "./user/User";
 import { UserDetailsView } from "./user/UserDetailsView";
 import { UserBriefView } from "./user/UserBriefView";
@@ -16,7 +16,7 @@ const Application = (props: ApplicationProp) => {
     return (
         <Router>
             <AuthenticationContextProvider>
-                <LoginButton />
+                <AppNavBar />
 
                 <AuthenticationContext.Consumer>
                     {(auth:Authentication) => (
