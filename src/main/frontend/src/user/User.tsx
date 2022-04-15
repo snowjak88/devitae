@@ -14,7 +14,8 @@ import { Authentication, AuthenticationContext } from '../auth/Authentication';
  *      A pre-configured UserContext.Provider, complete with configured methods for:
  *      - fetch(): fetching the current user
  *      - clear(): clear this context of its current user
- *      You must provide an Authentication object to this provider when instantiating it.
+ *
+ *      Note: you must wrap any <UserContextProvider> in an <AuthenticationContextProvider>.
  *
  * Example usage:
  *
@@ -63,7 +64,8 @@ export const UserContextProvider = (props:UserProviderProps) => {
         scopes: undefined,
         created: undefined,
         fetch: (id:number, auth:Authentication) => {
-            console.log(`Fetching user ${id} ...`);
+            if(id < 0)
+                return Promise.resolve();
             return axios.get(`/user/${id}`, { headers: { Authorization: `Bearer ${auth.jwt}` } })
                 .then(response => {
                     setUser({

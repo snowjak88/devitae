@@ -59,7 +59,7 @@ public class UserManagementEndpoints {
 
     @PreAuthorize("isAuthenticated() && hasAuthority('SCOPE_user_create')")
     @PutMapping(value = "/user/create", consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
-    public User createUser(String username, String password, @AuthenticationPrincipal JwtAuthenticationToken token) throws UserService.UsernameAlreadyExistsException {
+    public User createUser(String username, String password, @AuthenticationPrincipal JwtAuthenticationToken token) throws UserService.UsernameAlreadyExistsException, UserService.UsernameContainsInvalidCharactersException {
 
         final int creatorID = Integer.parseInt( (String) getJwt().getClaims().get("id") );
 
@@ -86,7 +86,7 @@ public class UserManagementEndpoints {
 
     @PreAuthorize("isAuthenticated() && hasAuthority('SCOPE_user_update') || authentication.principal.claims['id'] == #toUpdateID")
     @PostMapping(value="/user/{userID}", consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
-    public User updateUser(@PathVariable("userID") int toUpdateID, @RequestBody User toUpdate, @AuthenticationPrincipal JwtAuthenticationToken token) throws UserService.UserNotFoundException, UserService.UsernameAlreadyExistsException {
+    public User updateUser(@PathVariable("userID") int toUpdateID, @RequestBody User toUpdate, @AuthenticationPrincipal JwtAuthenticationToken token) throws UserService.UserNotFoundException, UserService.UsernameAlreadyExistsException, UserService.UsernameContainsInvalidCharactersException {
 
         final int updaterID = Integer.parseInt( (String) getJwt().getClaims().get("id") );
 

@@ -4,8 +4,9 @@ import { BrowserRouter as Router } from "react-router-dom";
 import { Button } from "@material-ui/core";
 
 import { Authentication, AuthenticationContext, AuthenticationContextProvider } from "./auth/Authentication";
-import { User, UserContext, UserContextProvider } from "./user/User";
 import { LoginButton } from "./auth/LoginButton";
+import { User, UserContext, UserContextProvider } from "./user/User";
+import { UserDetailsView } from "./user/UserDetailsView";
 
 type ApplicationProp = {}
 
@@ -20,11 +21,7 @@ const Application = (props: ApplicationProp) => {
                         <>
                             <p>You are {auth.authenticated ? `currently authenticated as user-ID ${auth.id}` : "not authenticated" }.</p>
                             <UserContextProvider id={auth.id}>
-                                <UserContext.Consumer>
-                                    {(user:User) => (
-                                        <p>Your username is {user.username}, and you were created on {user.created}.</p>
-                                    )}
-                                </UserContext.Consumer>
+                                <UserDetailsView />
                             </UserContextProvider>
                         </>
                     )}
