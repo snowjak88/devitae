@@ -1,6 +1,6 @@
 import { createContext, useContext, useState, ReactNode } from 'react';
 
-import axios, { AxiosError } from "axios";
+import axios from "axios";
 
 /*
  * Provides:
@@ -42,19 +42,17 @@ import axios, { AxiosError } from "axios";
 
 export type Authentication = {
     authenticated: boolean;
-    username?: string;
-    scopes: string[];
+    id: number;
     jwt?: string;
-    login: (username: string, password: string, onError?:(code: number) => void) => Promise<void>;
+    login: (username: string, password: string) => Promise<void>;
     logout: () => void;
 };
 
 export const AuthenticationContext = createContext<Authentication>({
     authenticated: false,
-    username: undefined,
-    scopes: [],
+    id: -1,
     jwt: undefined,
-    login: (username: string, password: string, onError?:(code: number) => void) => Promise.resolve(),
+    login: (username: string, password: string) => Promise.resolve(),
     logout: () => {}
 });
 
@@ -65,19 +63,17 @@ type AuthenticationProviderProps = {
 export const AuthenticationContextProvider = (props: AuthenticationProviderProps) => {
     const [auth, setAuth] = useState<Authentication>({
         authenticated: false,
-        username: undefined,
-        scopes: [],
+        id: -1,
         jwt: undefined,
-        login: (username: string, password: string, onError?:(code: number) => void) => {
+        login: (username: string, password: string) => {
             return axios
                 .post("/login", { username, password })
                 .then(response => {
-                    console.log(`Login successful: '${JSON.stringify(response)}'`);
                     setAuth({ ...auth, ...response.data });
                 });
         },
         logout: () => {
-            setAuth({ ...auth, authenticated: false, username: undefined, scopes: [], jwt: undefined });
+            setAuth({ ...auth, authenticated: false, id:-1, jwt: undefined });
         }
     });
 

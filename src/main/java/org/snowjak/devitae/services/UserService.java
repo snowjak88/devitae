@@ -11,8 +11,9 @@ import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.stereotype.Service;
 import org.springframework.web.bind.annotation.ResponseStatus;
 
-import java.util.Collection;
-import java.util.Objects;
+import java.util.*;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 import static net.logstash.logback.argument.StructuredArguments.kv;
 import static net.logstash.logback.argument.StructuredArguments.v;
@@ -22,11 +23,25 @@ public class UserService implements UserDetailsService {
 
     private static final Logger LOG = LoggerFactory.getLogger(UserService.class);
 
+    /**
+     * Usernames must not match this regex.
+     */
+    public static final String INVALID_USERNAME_CHARACTERS_REGEX = "([^a-zA-Z0-9_\\-])";
+    public static final Pattern INVALID_USERNAME = Pattern.compile(INVALID_USERNAME_CHARACTERS_REGEX);
+
     @Autowired
     private UserRepository userRepository;
 
     @Autowired
     private ScopeService scopeService;
+
+    private void checkForInvalidUsernameCharacters(String username) throws UsernameContainsInvalidCharactersException {
+        final Matcher invalidUsernameMatcher = INVALID_USERNAME.matcher(username);
+        if(invalidUsernameMatcher.find()) {
+            final String invalidCharacters = invalidUsernameMatcher.group(1).replaceAll(" ", "[space]");
+            throw new UsernameContainsInvalidCharactersException(username, invalidCharacters);
+        }
+    }
 
     @Override
     public User loadUserByUsername(String username) throws UsernameNotFoundException {
@@ -41,7 +56,9 @@ public class UserService implements UserDetailsService {
         return userRepository.findById(id).orElse(null);
     }
 
-    public User createUser(String username, String encryptedPassword) throws UsernameAlreadyExistsException {
+    public User createUser(String username, String encryptedPassword) throws UsernameAlreadyExistsException, UsernameContainsInvalidCharactersException {
+
+        checkForInvalidUsernameCharacters(username);
 
         if(userRepository.findByUsername(username) != null)
             throw new UsernameAlreadyExistsException(username);
@@ -53,7 +70,7 @@ public class UserService implements UserDetailsService {
         return userRepository.save(user);
     }
 
-    public User updateUser(int userID, User updatedUser) throws UserNotFoundException, UsernameAlreadyExistsException {
+    public User updateUser(int userID, User updatedUser) throws UserNotFoundException, UsernameAlreadyExistsException, UsernameContainsInvalidCharactersException {
 
         if(updatedUser == null)
             throw new IllegalArgumentException("Cannot update using a null user!");
@@ -65,6 +82,8 @@ public class UserService implements UserDetailsService {
         //
         // Update the user's username, if necessary.
         if(!toUpdate.getUsername().equals(updatedUser.getUsername())) {
+            checkForInvalidUsernameCharacters(updatedUser.getUsername());
+
             if (userRepository.findByUsername(updatedUser.getUsername()) != null)
                 throw new UsernameAlreadyExistsException(updatedUser.getUsername());
 
@@ -127,6 +146,13 @@ public class UserService implements UserDetailsService {
             throw new UserNotFoundException(userID);
 
         userRepository.delete(toDelete);
+    }
+
+    @ResponseStatus(code = HttpStatus.UNPROCESSABLE_ENTITY, reason = "Username contains invalid characters")
+    public static class UsernameContainsInvalidCharactersException extends Exception {
+        public UsernameContainsInvalidCharactersException(String username, String invalidCharacters) {
+            super(String.format("Username '%s' contains invalid characters ('%s')", username, invalidCharacters));
+        }
     }
 
     @ResponseStatus(code = HttpStatus.UNPROCESSABLE_ENTITY, reason = "Username already exists.")

@@ -1,8 +1,15 @@
 package org.snowjak.devitae.data.entities;
 
+import com.fasterxml.jackson.core.JsonGenerator;
+import com.fasterxml.jackson.databind.JavaType;
+import com.fasterxml.jackson.databind.JsonSerializer;
+import com.fasterxml.jackson.databind.SerializerProvider;
+import com.fasterxml.jackson.databind.type.TypeFactory;
+import com.fasterxml.jackson.databind.util.Converter;
 import org.springframework.security.core.GrantedAuthority;
 
 import javax.persistence.*;
+import java.io.IOException;
 
 @Entity
 @Table(name = "Scopes")
@@ -57,5 +64,13 @@ public class Scope implements GrantedAuthority {
     @Override
     public String getAuthority() {
         return name;
+    }
+
+    public static class Serializer extends JsonSerializer<Scope> {
+
+        @Override
+        public void serialize(Scope value, JsonGenerator gen, SerializerProvider serializers) throws IOException {
+            gen.writeString(value.getName());
+        }
     }
 }
