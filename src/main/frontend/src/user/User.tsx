@@ -37,22 +37,21 @@ import { Authentication, AuthenticationContext } from '../auth/Authentication';
  */
 
 export type User = {
-    id: number;
+    id?: number;
     username?: string;
     scopes?: string[];
     created?: Date;
-    fetch?: (id:number, auth:Authentication) => Promise<void>;
+    fetch?: (id:(number|undefined), auth:Authentication) => Promise<void>;
     clear?: () => void;
 };
 
 export const UserContext = createContext<User>({
-    id: -1,
-    fetch: (id:number, auth:Authentication) => Promise.resolve(),
+    fetch: (id:(number|undefined), auth:Authentication) => Promise.resolve(),
     clear: () => {}
 });
 
 type UserProviderProps = {
-    id: number,
+    id?: number,
     children: ReactNode | ReactNode[]
 };
 
@@ -63,8 +62,8 @@ export const UserContextProvider = (props:UserProviderProps) => {
         username: undefined,
         scopes: undefined,
         created: undefined,
-        fetch: (id:number, auth:Authentication) => {
-            if(id < 0)
+        fetch: (id:(number|undefined), auth:Authentication) => {
+            if(id === undefined)
                 return Promise.resolve();
             return axios.get(`/user/${id}`, { headers: { Authorization: `Bearer ${auth.jwt}` } })
                 .then(response => {
@@ -79,7 +78,7 @@ export const UserContextProvider = (props:UserProviderProps) => {
         },
         clear: () => {
             setUser({
-                id: -1,
+                id: undefined,
                 username: undefined,
                 scopes: undefined,
                 created: undefined

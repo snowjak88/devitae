@@ -17,12 +17,12 @@ const useStyles = makeStyles((theme:Theme) =>
     createStyles({
         root: {
             padding: theme.spacing(2),
-            margin: theme.spacing(2),
+            margin: theme.spacing(2)
         },
         title: {
             display: 'inline-flex',
-            marginBottom: theme.spacing(2),
-        },
+            marginBottom: theme.spacing(2)
+        }
     }));
 
 type UserDetailsViewProps = {};

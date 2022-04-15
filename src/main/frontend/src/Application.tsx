@@ -1,32 +1,35 @@
-import React, { useState, useEffect } from "react";
+import { useState } from 'react';
 import { BrowserRouter as Router } from "react-router-dom";
 
-import { Button } from "@material-ui/core";
-
 import { Authentication, AuthenticationContext, AuthenticationContextProvider } from "./auth/Authentication";
-import { LoginButton } from "./auth/LoginButton";
-import { User, UserContext, UserContextProvider } from "./user/User";
+import { AppNavBar } from "./nav/AppNavBar";
+import { UserContextProvider } from "./user/User";
 import { UserDetailsView } from "./user/UserDetailsView";
+import { UserBriefView } from "./user/UserBriefView";
 
 type ApplicationProp = {}
 
 const Application = (props: ApplicationProp) => {
 
+    const [ selectedUser, setSelectedUser ] = useState<number|undefined>( undefined );
+
     return (
         <Router>
             <AuthenticationContextProvider>
-                <h1>Hallo</h1>
+                <AppNavBar />
+
                 <AuthenticationContext.Consumer>
                     {(auth:Authentication) => (
-                        <>
-                            <p>You are {auth.authenticated ? `currently authenticated as user-ID ${auth.id}` : "not authenticated" }.</p>
-                            <UserContextProvider id={auth.id}>
-                                <UserDetailsView />
-                            </UserContextProvider>
-                        </>
+                        <UserContextProvider id={auth.id}>
+                            <UserBriefView onClick={() => setSelectedUser(auth.id)} />
+                        </UserContextProvider>
                     )}
                 </AuthenticationContext.Consumer>
-                <LoginButton />
+
+                <UserContextProvider id={selectedUser}>
+                    <UserDetailsView />
+                </UserContextProvider>
+
             </AuthenticationContextProvider>
         </Router>
     );
