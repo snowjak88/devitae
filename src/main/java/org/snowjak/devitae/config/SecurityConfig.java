@@ -15,6 +15,7 @@ import org.springframework.security.config.annotation.web.configurers.oauth2.ser
 import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.oauth2.jwt.JwtDecoder;
 import org.springframework.security.oauth2.jwt.NimbusJwtDecoder;
+import org.springframework.security.web.csrf.CookieCsrfTokenRepository;
 
 import java.security.*;
 import java.security.interfaces.RSAPrivateKey;
@@ -40,13 +41,6 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
     private String keystorePrivateKeyPassphrase;
 
     @Override
-    public void configure(WebSecurity web) throws Exception {
-        web.ignoring()
-                .antMatchers(HttpMethod.GET, "/")
-                .antMatchers(HttpMethod.GET, "/index.html", "/**/*.ico", "/**/*.js", "/**/*.css", "/**/*.json");
-    }
-
-    @Override
     protected void configure(HttpSecurity http) throws Exception {
         http.sessionManagement()
                 .sessionCreationPolicy(SessionCreationPolicy.STATELESS)
@@ -54,7 +48,8 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
             .cors()
                 .and()
             .csrf()
-                .disable()
+                .csrfTokenRepository(CookieCsrfTokenRepository.withHttpOnlyFalse())
+                .and()
             .authorizeRequests()
                 .anyRequest().permitAll()
                 .and()
