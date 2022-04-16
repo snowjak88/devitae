@@ -2,6 +2,7 @@ package org.snowjak.devitae.services;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.snowjak.devitae.data.entities.Scope;
 import org.snowjak.devitae.data.entities.User;
 import org.snowjak.devitae.data.repositories.UserRepository;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -14,6 +15,7 @@ import org.springframework.web.bind.annotation.ResponseStatus;
 import java.util.*;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
+import java.util.stream.Collectors;
 
 import static net.logstash.logback.argument.StructuredArguments.kv;
 import static net.logstash.logback.argument.StructuredArguments.v;
@@ -106,36 +108,32 @@ public class UserService implements UserDetailsService {
         userRepository.save(toUpdate);
     }
 
-    public void changeUserScopes(int toUpdateID, Collection<String> add, Collection<String> remove) throws UserNotFoundException {
+    public void changeUserScopes(int toUpdateID, Collection<String> newScopeNames) throws UserNotFoundException {
+        final Collection<Scope> newScopes = newScopeNames.stream()
+                .map(scopeService::findByName)
+                .filter(Objects::nonNull)
+                .collect(Collectors.toList());
 
         final User toUpdate = userRepository.findById(toUpdateID).orElse(null);
         if(toUpdate == null)
             throw new UserNotFoundException(toUpdateID);
 
-        boolean modified = false;
-        if(add != null) {
-            LOG.info("Adding scopes to user", kv("userID", toUpdateID), kv("scopes", add));
-            modified = add.stream()
-                    .map(scopeService::findByName)
-                    .filter(Objects::nonNull)
-                    .filter(s -> !toUpdate.getScopes().contains(s))
+        final Set<Scope> adding = newScopes.stream().filter(s -> !toUpdate.getScopes().contains(s)).collect(Collectors.toSet());
+        final Set<Scope> removing = toUpdate.getScopes().stream().filter(s -> !newScopes.contains(s)).collect(Collectors.toSet());
+
+        if(!adding.isEmpty()) {
+            adding.stream()
                     .peek(s -> LOG.debug("Adding scope {} to user #{}", v("scope", s.getName()), v("userID", toUpdateID)))
-                    .peek(s -> toUpdate.getScopes().add(s))
-                    .findAny().isPresent();
+                    .peek(s -> toUpdate.getScopes().add(s));
         }
 
-        if(remove != null) {
-            LOG.info("Removing scopes from user", kv("userID", toUpdateID), kv("scopes", remove));
-            modified |= remove.stream()
-                    .map(scopeService::findByName)
-                    .filter(Objects::nonNull)
-                    .filter(s -> toUpdate.getScopes().contains(s))
+        if(!removing.isEmpty()) {
+            removing.stream()
                     .peek(s -> LOG.debug("Removing scope {} to user #{}", v("scope", s.getName()), v("userID", toUpdateID)))
-                    .peek(s -> toUpdate.getScopes().remove(s))
-                    .findAny().isPresent();
+                    .peek(s -> toUpdate.getScopes().remove(s));
         }
 
-        if(modified)
+        if(!adding.isEmpty() && !removing.isEmpty())
             userRepository.save(toUpdate);
     }
 

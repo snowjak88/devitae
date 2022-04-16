@@ -28,6 +28,9 @@ devitae:
 spring:
   application:
     name: devitae
+  data:
+    rest:
+      basePath: /api
   datasource:
     embedded-database-connection: none
     url: jdbc:${JAWSDB_MARIA_URL}

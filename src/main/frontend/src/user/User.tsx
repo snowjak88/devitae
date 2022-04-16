@@ -65,7 +65,7 @@ export const UserContextProvider = (props:UserProviderProps) => {
         fetch: (id:(number|undefined), auth:Authentication) => {
             if(id === undefined)
                 return Promise.resolve();
-            return axios.get(`/user/${id}`, { headers: { Authorization: `Bearer ${auth.jwt}` } })
+            return axios.get(`/api/users/${id}`, { headers: { Authorization: `Bearer ${auth.jwt}` } })
                 .then(response => {
                     setUser({
                         ...user,

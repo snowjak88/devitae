@@ -38,7 +38,6 @@ public class User implements UserDetails {
     @ManyToMany(targetEntity = Scope.class, fetch = FetchType.EAGER)
     @JoinTable(name = "User_Scopes", joinColumns = @JoinColumn(name = "userID"), inverseJoinColumns = @JoinColumn(name = "scopeID"))
     @JsonProperty
-    @JsonSerialize(contentUsing=Scope.Serializer.class)
     private Collection<Scope> scopes = new ArrayList<>();
 
     @Basic(optional = false)
