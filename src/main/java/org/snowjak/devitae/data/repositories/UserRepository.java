@@ -24,19 +24,20 @@ public interface UserRepository extends PagingAndSortingRepository<User, Integer
 
     @RestResource(exported = false)
     @Override
-    <S extends User> S save(S entity);
+    <S extends User> S save(S user);
 
     @RestResource(exported = false)
     @Override
     <S extends User> Iterable<S> saveAll(Iterable<S> entities);
 
-    @RestResource(exported = false)
+    @PreAuthorize("isAuthenticated() && ( hasAuthority('SCOPE_user_viewDetails') || authentication.principal.claims['id'] == #userId )")
+    @RestResource(description = @Description("Find a user by their ID."))
     @Override
-    Optional<User> findById(Integer integer);
+    Optional<User> findById(Integer userId);
 
     @RestResource(exported = false)
     @Override
-    boolean existsById(Integer integer);
+    boolean existsById(Integer userId);
 
     @RestResource(exported = false)
     @Override
@@ -44,11 +45,12 @@ public interface UserRepository extends PagingAndSortingRepository<User, Integer
 
     @RestResource(exported = false)
     @Override
-    Iterable<User> findAllById(Iterable<Integer> integers);
+    Iterable<User> findAllById(Iterable<Integer> userIds);
 
-    @RestResource(exported = false)
+    @PreAuthorize("isAuthenticated() && hasAuthority('SCOPE_user_delete') && authentication.principal.claims['id'] != #userId")
+    @RestResource(description = @Description("Delete a user by their ID."))
     @Override
-    void deleteById(Integer integer);
+    void deleteById(Integer userId);
 
     @RestResource(exported = false)
     @Override

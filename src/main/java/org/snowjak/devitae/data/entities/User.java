@@ -2,8 +2,11 @@ package org.snowjak.devitae.data.entities;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonProperty;
+import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
 import com.fasterxml.jackson.databind.annotation.JsonSerialize;
+import org.snowjak.devitae.data.conversion.ScopeSerializationSupport;
 import org.springframework.data.annotation.CreatedDate;
+import org.springframework.data.annotation.LastModifiedDate;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
 
@@ -22,7 +25,6 @@ public class User implements UserDetails {
     private int id;
 
     @Version
-    @JsonIgnore
     private int version;
 
     @Basic(optional = false)
@@ -37,13 +39,22 @@ public class User implements UserDetails {
 
     @ManyToMany(targetEntity = Scope.class, fetch = FetchType.EAGER)
     @JoinTable(name = "User_Scopes", joinColumns = @JoinColumn(name = "userID"), inverseJoinColumns = @JoinColumn(name = "scopeID"))
-    @JsonProperty
+    @JsonProperty(access = JsonProperty.Access.READ_ONLY)
+    @JsonSerialize(contentUsing = ScopeSerializationSupport.SerializerByName.class)
+    @JsonDeserialize(contentUsing = ScopeSerializationSupport.DeserializerByName.class)
     private Collection<Scope> scopes = new ArrayList<>();
 
     @Basic(optional = false)
+    @Column(name = "created", nullable = false)
     @CreatedDate
     @JsonProperty(access = JsonProperty.Access.READ_ONLY)
     private Instant created;
+
+    @Basic(optional = false)
+    @Column(name = "lastModified", nullable = false)
+    @LastModifiedDate
+    @JsonProperty(access = JsonProperty.Access.READ_ONLY)
+    private Instant lastModified;
 
     public int getId() {
         return id;
@@ -98,7 +109,13 @@ public class User implements UserDetails {
         this.created = created;
     }
 
+    public Instant getLastModified() {
+        return lastModified;
+    }
 
+    public void setLastModified(Instant lastModified) {
+        this.lastModified = lastModified;
+    }
 
     @Override
     public boolean isAccountNonExpired() {

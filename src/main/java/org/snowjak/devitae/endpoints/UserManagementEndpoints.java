@@ -6,6 +6,7 @@ import org.snowjak.devitae.data.entities.Scope;
 import org.snowjak.devitae.data.entities.User;
 import org.snowjak.devitae.services.UserService;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.rest.core.annotation.Description;
 import org.springframework.data.rest.core.annotation.RestResource;
 import org.springframework.data.rest.webmvc.BasePathAwareController;
@@ -52,28 +53,14 @@ public class UserManagementEndpoints {
         return (Jwt) token.getPrincipal();
     }
 
-    @PreAuthorize("isAuthenticated() && ( hasAuthority('SCOPE_user_viewDetails') || authentication.principal.claims['id'] == #userId )")
-    @RequestMapping(method = GET, value = "/users/{userID}", produces = MediaType.APPLICATION_JSON_VALUE)
-    @RestResource(description = @Description("Get this user's record."))
-    public User getUser(@PathVariable("userID") int userID) {
-
-        final int viewerID = Integer.parseInt( (String) getJwt().getClaims().get("id") );
-        LOG.debug("Viewing user.", kv("viewerID", viewerID), kv("viewedID", userID));
-
-        final User result = userService.findByID(userID);
-
-        if(result == null)
-            LOG.debug("Trying to view user by ID, but that ID doesn't exist.", kv("viewerID", viewerID), kv("userID", userID));
-
-        return result;
-    }
-
     @PreAuthorize("isAuthenticated() && hasAuthority('SCOPE_user_create')")
-    @RequestMapping(method = POST, path = "/users", consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
+    @RequestMapping(method = PUT, path = "/users", consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
     @RestResource(description = @Description("Create a new user."))
-    public User createUser(String username, String password, @AuthenticationPrincipal JwtAuthenticationToken token) throws UserService.UsernameAlreadyExistsException, UserService.UsernameContainsInvalidCharactersException {
+    public User createUser(String username, String password,
+                           //@AuthenticationPrincipal JwtAuthenticationToken token,
+                           @Value("${authentication.principal.claims['id']}") int creatorID) throws UserService.UsernameAlreadyExistsException, UserService.UsernameContainsInvalidCharactersException {
 
-        final int creatorID = Integer.parseInt( (String) getJwt().getClaims().get("id") );
+        //final int creatorID = Integer.parseInt( (String) getJwt().getClaims().get("id") );
 
         LOG.info("Creating a new user.", kv("creatorID", creatorID), kv("username", username));
         final User newUser = userService.createUser(username, password);
@@ -81,28 +68,30 @@ public class UserManagementEndpoints {
         return newUser;
     }
 
-    @PreAuthorize("isAuthenticated() && hasAuthority('SCOPE_user_delete')")
-    @RequestMapping(method = DELETE, value = "/users/{userID}", produces = MediaType.APPLICATION_JSON_VALUE)
-    @RestResource(description = @Description("Deletes this user."))
-    public HttpStatus deleteUser(@PathVariable("userID") int toDeleteID, @AuthenticationPrincipal JwtAuthenticationToken token) throws UserService.UserNotFoundException {
-
-        final int deleterID = Integer.parseInt( (String) getJwt().getClaims().get("id") );
-
-        if(toDeleteID == deleterID)
-            throw new CannotDeleteSelfException();
-
-        LOG.info("Deleting user.", kv("deleterID", deleterID), kv("toDeleteID", toDeleteID));
-        userService.deleteUser(toDeleteID);
-        LOG.debug("Deleted user.", kv("deleterID", deleterID), kv("toDeleteID", toDeleteID));
-        return HttpStatus.OK;
-    }
+//    @PreAuthorize("isAuthenticated() && hasAuthority('SCOPE_user_delete')")
+//    @RequestMapping(method = DELETE, value = "/users/{userID}", produces = MediaType.APPLICATION_JSON_VALUE)
+//    @RestResource(description = @Description("Deletes this user."))
+//    public HttpStatus deleteUser(@PathVariable("userID") int toDeleteID, @AuthenticationPrincipal JwtAuthenticationToken token) throws UserService.UserNotFoundException {
+//
+//        final int deleterID = Integer.parseInt( (String) getJwt().getClaims().get("id") );
+//
+//        if(toDeleteID == deleterID)
+//            throw new CannotDeleteSelfException();
+//
+//        LOG.info("Deleting user.", kv("deleterID", deleterID), kv("toDeleteID", toDeleteID));
+//        userService.deleteUser(toDeleteID);
+//        LOG.debug("Deleted user.", kv("deleterID", deleterID), kv("toDeleteID", toDeleteID));
+//        return HttpStatus.OK;
+//    }
 
     @PreAuthorize("isAuthenticated() && hasAuthority('SCOPE_user_update') || authentication.principal.claims['id'] == #toUpdateID")
     @RequestMapping(method = PUT, value="/users/{userID}", consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
     @RestResource(description = @Description("Update this user's details (excluding password and scopes)."))
-    public User updateUser(@PathVariable("userID") int toUpdateID, @RequestBody User toUpdate, @AuthenticationPrincipal JwtAuthenticationToken token) throws UserService.UserNotFoundException, UserService.UsernameAlreadyExistsException, UserService.UsernameContainsInvalidCharactersException {
+    public User updateUser(@PathVariable("userID") int toUpdateID, @RequestBody User toUpdate,
+                           //@AuthenticationPrincipal JwtAuthenticationToken token,
+                           @Value("${authentication.principal.claims['id']}") int updaterID) throws UserService.UserNotFoundException, UserService.UsernameAlreadyExistsException, UserService.UsernameContainsInvalidCharactersException {
 
-        final int updaterID = Integer.parseInt( (String) getJwt().getClaims().get("id") );
+        //final int updaterID = Integer.parseInt( (String) getJwt().getClaims().get("id") );
 
         LOG.info("Updating user.", kv("updaterID", updaterID), kv("toUpdateID", toUpdateID));
         final User result = userService.updateUser(toUpdateID, toUpdate);
@@ -113,9 +102,11 @@ public class UserManagementEndpoints {
     @PreAuthorize("isAuthenticated() && hasAuthority('SCOPE_user_update') || authentication.principal.claims['id'] == #toUpdateID")
     @RequestMapping(method = PATCH, value="/users/{userID}/password", consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
     @RestResource(description = @Description("Update this user's password."))
-    public HttpStatus changePassword(@PathVariable("userID") int toUpdateID, @RequestParam("password") String password, @AuthenticationPrincipal JwtAuthenticationToken token) throws UserService.UserNotFoundException {
+    public HttpStatus changePassword(@PathVariable("userID") int toUpdateID, @RequestParam("password") String password,
+                                     //@AuthenticationPrincipal JwtAuthenticationToken token,
+                                     @Value("${authentication.principal.claims['id']}") int updaterID) throws UserService.UserNotFoundException {
 
-        final int updaterID = Integer.parseInt( (String) getJwt().getClaims().get("id") );
+        //final int updaterID = Integer.parseInt( (String) getJwt().getClaims().get("id") );
 
         LOG.info("Changing password.", kv("updaterID", updaterID), kv("toUpdateID", toUpdateID));
         userService.changePassword(toUpdateID, passwordEncoder.encode(password));
@@ -126,9 +117,11 @@ public class UserManagementEndpoints {
     @PreAuthorize("isAuthenticated() && hasAuthority('SCOPE_user_chmod')")
     @RequestMapping(method = PATCH, value="/users/{userID}/scopes", consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
     @RestResource(description = @Description("Change the set of scopes associated with this user."))
-    public User updateUserScopes(@PathVariable("userID") int toUpdateID, @RequestBody Collection<String> scopes, @AuthenticationPrincipal JwtAuthenticationToken token) throws UserService.UserNotFoundException {
+    public User updateUserScopes(@PathVariable("userID") int toUpdateID, @RequestBody Collection<String> scopes,
+                                 //@AuthenticationPrincipal JwtAuthenticationToken token,
+                                 @Value("${authentication.principal.claims['id']}") int updaterID) throws UserService.UserNotFoundException {
 
-        final int updaterID = Integer.parseInt( (String) getJwt().getClaims().get("id") );
+        //final int updaterID = Integer.parseInt( (String) getJwt().getClaims().get("id") );
 
         final String newScopes = scopes.stream().collect(Collectors.joining(","));
         LOG.info("Modifying user scopes.", kv("updaterID", updaterID), kv("toUpdateID", toUpdateID), kv("newScopes", newScopes));
